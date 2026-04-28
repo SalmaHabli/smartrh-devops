@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        node {
+            label "POD03"
+        }
+    }
 
     environment {
         DOCKERHUB_USER = "salma217"
@@ -16,6 +20,12 @@ pipeline {
             }
         }
 
+        stage('Check Docker') {
+            steps {
+                sh "docker --version"
+            }
+        }
+
         stage('Build Backend') {
             steps {
                 sh "docker build -t $DOCKERHUB_USER/$BACKEND_IMAGE:$VERSION ./backend"
@@ -28,7 +38,7 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
+        stage('Login DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id',
                                                   usernameVariable: 'USER',
@@ -57,7 +67,7 @@ pipeline {
 
         stage('Success') {
             steps {
-                echo "🚀 CI/CD Completed Successfully"
+                echo "🚀 CI/CD Pipeline OK"
             }
         }
     }
