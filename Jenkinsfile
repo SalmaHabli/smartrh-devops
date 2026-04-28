@@ -1,7 +1,7 @@
 pipeline {
     agent {
         node {
-            label "POD03"
+            label "jenkins-agent=true"
         }
     }
 
