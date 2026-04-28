@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        node {
-            label "jenkins-agent=true"
-        }
-    }
+    agent any
 
     environment {
         DOCKERHUB_USER = "salma217"
@@ -20,9 +16,12 @@ pipeline {
             }
         }
 
-        stage('Check Docker') {
+        stage('Check Tools') {
             steps {
-                sh "docker --version"
+                sh """
+                    docker --version
+                    kubectl version --client
+                """
             }
         }
 
@@ -38,11 +37,13 @@ pipeline {
             }
         }
 
-        stage('Login DockerHub') {
+        stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id',
-                                                  usernameVariable: 'USER',
-                                                  passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials-id',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
                     sh "echo $PASS | docker login -u $USER --password-stdin"
                 }
             }
@@ -62,12 +63,13 @@ pipeline {
                 sh "kubectl apply -f postgres-deployment.yaml"
                 sh "kubectl apply -f backend-service.yaml"
                 sh "kubectl apply -f frontend-service.yaml"
+                sh "kubectl apply -f postgres-service.yaml"
             }
         }
 
         stage('Success') {
             steps {
-                echo "🚀 CI/CD Pipeline OK"
+                echo "🚀 CI/CD PIPELINE SUCCESS"
             }
         }
     }
